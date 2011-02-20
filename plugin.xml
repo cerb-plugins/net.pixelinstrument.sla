@@ -1,0 +1,53 @@
+<!DOCTYPE plugin SYSTEM "../../libs/devblocks/plugin.dtd">
+<plugin>
+	<id>net.pixelinstrument.sla</id>
+	<name>[PI] Tickets SLA Management</name>
+	<description>Manage calculation of SLA dates for tickets Version 1.0.0</description>
+	<author>Davide Cassenti</author>
+	<revision>1.0.0</revision>
+	<link>http://www.pixelinstrument.net</link>
+	<image>plugin.png</image>
+	
+	<!-- Dependencies -->
+	
+	<dependencies>
+		<require plugin_id="devblocks.core" version="2.0.0" />
+	</dependencies>
+	
+	<!-- ACL -->
+	
+	<!-- Exported Classes -->
+	
+	<class_loader>
+		<file path="api/util.php">
+			<class name="PiSlaUtils" />
+		</file>
+	</class_loader>
+
+	<extensions>
+		<extension point="cerberusweb.config.tab">
+			<id>net.pixelinstrument.sla.config.tab</id>
+			<name>SLA Config Tab</name>
+			<class>
+				<file>api/config.php</file>
+				<name>PiSlaConfigTab</name>
+			</class>
+			<params>
+				<param key="uri" value="sla" />
+				<param key="title" value="SLA Management" />
+			</params>
+		</extension>
+		
+		<!-- Toolbar text -->	
+		<extension point="cerberusweb.ticket.toolbaritem">
+			<id>net.pixelinstrument.sla.ticket.toolbaritem</id>
+			<name>SLA Toolbar</name>
+			<class>
+				<file>api/ticket_toolbar.php</file>
+				<name>PiSlaToolbarSLA</name>
+			</class>
+			<params>
+			</params>
+		</extension>
+	</extensions>
+</plugin>
