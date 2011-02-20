@@ -132,6 +132,8 @@ class PiSlaUtils {
         $working_days = $properties['working_days'];
 			
 		$cur_date = date ("Y-m-d", $start);
+		$business_days++;
+		
 		while ($business_days) {
 			if (in_array (date("w", strtotime ($cur_date)), $working_days)) {
 				if (!in_array ($cur_date, $holidays)) {
