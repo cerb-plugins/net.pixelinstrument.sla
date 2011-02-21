@@ -2,21 +2,49 @@
 class PiSlaUtils {
 	const ID = 'net.pixelinstrument.sla.utils';
 	
-	function getTicketSLAInfo($ticket_id, $customer_id) {
+	/***
+	* getTicketSLAInfo
+	* Retrieve an associative array with the SLA information:
+	* - first_response_time: the timestamp of the first response to the ticket
+	* - last_response_time: the timestamp of the last response to the ticket
+	* - response_days: how many days a worker needed to reply
+	* - response_business_days: how many business days a worker needed to reply
+	* - last_response_days_ago: how many days ago the last response was sent
+	* - last_response_business_days_ago: how many business days ago the last response was sent
+	* - customer_type: the type of the customer who opened the ticket (different types have different SLA rules)
+	* - sla_type: 's' if days are considered standard days, 'b' if they are considered business days
+	* - sla_days: how many days has the worker to reply (standard or business days depending on customer's type)
+	* - sla_status: green (successful initial response), yellow (not responded yet, but on time), red (missed SLA)
+	* - sla_end_date: the date when before which a reply must be sent
+	*
+	* $ticket_id the id of the ticket
+	*
+	* return the associative array with the information
+	*/
+	function getTicketSLAInfo($ticket_id) {
 		$ticket_sla_info = array(
 			'first_response_time' => -1,
 			'last_response_time' => -1,
 			'response_days' => -1,
 			'response_business_days' => -1,
+			'last_response_days_ago' => -1,
+			'last_response_business_days_ago' => -1,
 			'customer_type' => '',
-			'sla_days' => -1,
-			'sla_status' => '',
+			'sla_type' => 's',
+			'sla_days' => 0,
+			'sla_status' => 'green',
 			'sla_end_date' => -1
 		);
 		
 		$ticket = DAO_Ticket::get ($ticket_id);
 		if (!$ticket || $ticket->id != $ticket_id)
 			return $ticket_sla_info;
+			
+		$customer_id = 0;					
+		// Get the customer id
+		$address = DAO_Address::get ($ticket->first_wrote_address_id);
+		if ($address)
+			$customer_id = $address->contact_org_id;
 		
 		$properties = self::getProperties();
 		
@@ -59,68 +87,75 @@ class PiSlaUtils {
 		// find out if we missed the SLA
 		$customer_type_field_id = $properties['customer_type_field_id'];
 		
-		// get all the customers custom values
-        
-        list($customers) = DAO_ContactOrg::search (
-            array(),
-            array(),
-            -1,
-            0,
-            null,
-            null,
-            false
-        );
+		// get custom values for the customer, if any
+		if ($customer_id > 0) {
+			$customers_custom_values = DAO_CustomFieldValue::getValuesByContextIds(CerberusContexts::CONTEXT_ORG, array($customer_id));
+			
+			$customer_type = "";
+			if ($customer_id &&
+				$customer_type_field_id &&
+				isset ($customers_custom_values[$customer_id]) &&
+				isset ($customers_custom_values[$customer_id][$customer_type_field_id])) {
+				
+				$customer_type = $customers_custom_values[$customer_id][$customer_type_field_id];
 
-        $customers_custom_values = DAO_CustomFieldValue::getValuesByContextIds(CerberusContexts::CONTEXT_ORG, array_keys ($customers));
-		
-		$customer_type = "";
-		if ($customer_id &&
-			$customer_type_field_id &&
-			isset ($customers_custom_values[$customer_id]) &&
-			isset ($customers_custom_values[$customer_id][$customer_type_field_id])) {
+				$sla = isset ($properties['sla'][$customer_type]) ? ($properties['sla'][$customer_type]) : 0;
+				$sla_type = isset ($properties['sla_type'][$customer_type]) ? ($properties['sla_type'][$customer_type]) : "b";
+				
+				$ticket_sla_info['sla_days'] = $sla;
+				$ticket_sla_info['sla_type'] = $sla_type;
+				$ticket_sla_info['customer_type'] = $customer_type;
 			
-			$customer_type = $customers_custom_values[$customer_id][$customer_type_field_id];
-
-			$sla = isset ($properties['sla'][$customer_type]) ? ($properties['sla'][$customer_type]) : 0;
-			$sla_type = isset ($properties['sla_type'][$customer_type]) ? ($properties['sla_type'][$customer_type]) : "b";
 			
-			$ticket_sla_info['sla_days'] = $sla;
-			$ticket_sla_info['sla_type'] = $sla_type;
-			$ticket_sla_info['customer_type'] = $customer_type;
-		
-		
-			// calculate SLA end date
-			switch ($ticket_sla_info['sla_type']) {
-				case 's':
-					$first_response_time_to_use = $ticket_sla_info['response_business_days'];
-					$ticket_sla_info['sla_end_date'] = $ticket->created_date + ($sla * 24 * 60 * 60);
-					
-					break;
+				// calculate SLA end date
+				switch ($ticket_sla_info['sla_type']) {
+					case 's':
+						$first_response_time_to_use = $ticket_sla_info['response_business_days'];
+						$ticket_sla_info['sla_end_date'] = $ticket->created_date + ($sla * 24 * 60 * 60);
+						
+						break;
+				
+					case 'b':
+					default:
+						$ticket_sla_info['sla_end_date'] = self::getEndBusinessDate ($ticket->created_date, $sla);
+						$first_response_time_to_use = $ticket_sla_info['response_days'];
+						
+						break;
+				}
 			
-				case 'b':
-				default:
-					$ticket_sla_info['sla_end_date'] = self::getEndBusinessDate ($ticket->created_date, $sla);
-					$first_response_time_to_use = $ticket_sla_info['response_days'];
-					
-					break;
+				// check if we missed SLA
+				if ($ticket_sla_info['sla_days'] == 0) {
+					$ticket_sla_info['sla_status'] = "green"; // everything is ok, no SLA here
+				} else if ($first_response_time_to_use > $ticket_sla_info['sla_days']) {
+					$ticket_sla_info['sla_status'] = "red"; // oops, we missed it
+				} else if ($ticket_sla_info['first_response_time'] == -1) {
+					$ticket_sla_info['sla_status'] = "yellow"; // we're still in time...
+				} else {
+					$ticket_sla_info['sla_status'] = "green"; // great job!
+				}
 			}
+		}
 		
-			// check if we missed SLA
-			if ($ticket_sla_info['sla_days'] == 0) {
-				$ticket_sla_info['sla_status'] = "green"; // everything is ok, no SLA here
-			} else if ($first_response_time_to_use > $ticket_sla_info['sla_days']) {
-				$ticket_sla_info['sla_status'] = "red"; // oops, we missed it
-			} else if ($ticket_sla_info['first_response_time'] == -1) {
-				$ticket_sla_info['sla_status'] = "yellow"; // we're still in time...
-			} else {
-				$ticket_sla_info['sla_status'] = "green"; // great job!
-			}
+		
+		// calculate how many days ago the last reply was sent
+		if ($ticket_sla_info['last_response_time'] > 0) {
+			$ticket_sla_info['last_response_business_days_ago'] = PiSlaUtils::calculateWorkingDays ($ticket_sla_info['last_response_time'], time());
+			$ticket_sla_info['last_response_days_ago'] = PiSlaUtils::calculateDays ($ticket_sla_info['last_response_time'], time());
 		}
 		
 		return $ticket_sla_info;
 	}
 	
-	
+	/***
+	* getEndBusinessDate
+	* Calculate the date resulting from the sum of $start with $business_days
+	*
+	* $start the timestamp of the starting date
+	* $business_days the number of business days to add
+	* $properties array with the properties to use (if null, it will recreated)
+	*
+	* return the resulting end date
+	*/
 	static function getEndBusinessDate ($start, $business_days, $properties =  null) {
 		if ($business_days <= 0)
 			return $start;

@@ -1,14 +1,43 @@
-<span id="ticket_sla_days">
-	<span class="cerb-sprite sprite-stopwatch" style="padding-bottom: 4px"></span>
-	<strong>SLA:</strong>
-		<span>{$ticket_sla} day{if $ticket_sla!=1}s {if $customer_type}({$customer_type}){/if}{/if}</span>
-</span>
+{if $ticket_sla_info.sla_days > 0}
+	<span id="ticket_sla_days">
+		<span class="cerb-sprite sprite-stopwatch" style="padding-bottom: 4px"></span>
+		<strong>SLA:</strong>
+			<span>{$ticket_sla_info.sla_days} {if $ticket_sla_info.sla_type == 'b'}business{/if} day{if $ticket_sla_info.sla_days != 1}s{/if}</span>
+	</span>
+{/if}
 
 <span id="ticket_sla_first_response">
 	<strong>First Response:</strong>
-		<span {if $no_response || ($ticket_sla > 0 && $first_update > $ticket_sla)}style="color:#C00;"{/if}>{if $no_response}none {/if}in {$first_update} day{if $first_update!=1}s{/if}</span>
+		{if $ticket_sla_info.sla_type == "b"}
+			<span style="{if $ticket_sla_info.response_business_days == -1 || $ticket_sla_info.response_business_days > $ticket_sla_info.sla_days}color:#C00;{/if}">
+				{if $ticket_sla_info.response_business_days == -1}
+					none
+				{else}
+					in {$ticket_sla_info.response_business_days} business days
+				{/if}
+			</span>
+		{else}
+			<span style="{if $ticket_sla_info.response_days == -1 || $ticket_sla_info.response_days > $ticket_sla_info.sla_days}color:#C00;{/if}">
+				{if $ticket_sla_info.response_days == -1}
+					none
+				{else}
+					in {$ticket_sla_info.response_days} days
+				{/if}
+			</span>
+		{/if}
 </span>
 
 <span id="ticket_sla_last_response">	
-	<strong>Last Response:</strong> <span {if $no_response}style="color:#C00;"{/if}>{if $no_response}never{else}{$last_update} day{if $last_update!=1}s{/if} ago{/if}</span>
+	<strong>Last Response:</strong>
+		<span class="{if $ticket_sla_info.last_response_time == -1}color:#C00;{/if}">
+			{if $ticket_sla_info.last_response_time == -1}
+				none
+			{else}
+				{if $ticket_sla_info.sla_type == "b"}
+					{$ticket_sla_info['last_response_business_days_ago']} business days ago
+				{else}
+					{$ticket_sla_info['last_response_days_ago']} days ago
+				{/if}
+			{/if}
+		</span>
 </span>
