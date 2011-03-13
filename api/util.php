@@ -77,11 +77,11 @@ class PiSlaUtils {
 		
 		// now transform the dates in number of days and business days
 		
-		$response_date = $ticket_sla_info['first_response_time'] != -1 ? $ticket_sla_info['first_response_time'] : time();
+		//$response_date = $ticket_sla_info['first_response_time'] != -1 ? $ticket_sla_info['first_response_time'] : time();
 		
-		$ticket_sla_info['response_days'] = self::calculateDays ($ticket->created_date, $ticket_sla_info['first_response_time']);
+		$ticket_sla_info['response_days'] = $ticket_sla_info['first_response_time'] != -1 ? self::calculateDays ($ticket->created_date, $ticket_sla_info['first_response_time']) : -1;
 			
-		$ticket_sla_info['response_business_days'] = self::calculateWorkingDays ($ticket->created_date, $ticket_sla_info['first_response_time'], $properties);
+		$ticket_sla_info['response_business_days'] = $ticket_sla_info['first_response_time'] != -1 ? self::calculateWorkingDays ($ticket->created_date, $ticket_sla_info['first_response_time'], $properties) : -1;
 		
 		
 		// find out if we missed the SLA
