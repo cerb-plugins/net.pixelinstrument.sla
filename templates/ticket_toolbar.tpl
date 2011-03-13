@@ -9,7 +9,7 @@
 	<span id="ticket_sla_first_response">
 		<strong>First Response:</strong>
 			{if $ticket_sla_info.sla_type == "b"}
-				{if $ticket_sla_info.response_business_days == -1 && $smarty.now <= $ticket_sla_info.sla_days}
+				{if $ticket_sla_info.response_business_days == -1 && $ticket_sla_info.business_days_passed <= $ticket_sla_info.sla_days}
 					{assign var=sla_color value='#CA0'}
 				{else if $ticket_sla_info.response_business_days == -1 || $ticket_sla_info.response_business_days > $ticket_sla_info.sla_days}
 					{assign var=sla_color value='#C00'}
@@ -25,7 +25,7 @@
 					{/if}
 				</span>
 			{else}
-				{if $ticket_sla_info.response_days == -1 && $smarty.now <= $ticket_sla_info.sla_days}
+				{if $ticket_sla_info.response_days == -1 && $ticket_sla_info.days_passed <= $ticket_sla_info.sla_days}
 					{assign var=sla_color value='#CA0'}
 				{else if $ticket_sla_info.response_days == -1 || $ticket_sla_info.response_days > $ticket_sla_info.sla_days}
 					{assign var=sla_color value='#C00'}

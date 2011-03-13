@@ -33,7 +33,9 @@ class PiSlaUtils {
 			'sla_type' => 's',
 			'sla_days' => 0,
 			'sla_status' => 'green',
-			'sla_end_date' => -1
+			'sla_end_date' => -1,
+			'days_passed' => -1,
+			'busoness_days_passed' => -1
 		);
 		
 		$ticket = DAO_Ticket::get ($ticket_id);
@@ -80,8 +82,10 @@ class PiSlaUtils {
 		//$response_date = $ticket_sla_info['first_response_time'] != -1 ? $ticket_sla_info['first_response_time'] : time();
 		
 		$ticket_sla_info['response_days'] = $ticket_sla_info['first_response_time'] != -1 ? self::calculateDays ($ticket->created_date, $ticket_sla_info['first_response_time']) : -1;
-			
 		$ticket_sla_info['response_business_days'] = $ticket_sla_info['first_response_time'] != -1 ? self::calculateWorkingDays ($ticket->created_date, $ticket_sla_info['first_response_time'], $properties) : -1;
+		
+		$ticket_sla_info['days_passed'] = self::calculateDays ($ticket->created_date, time());
+		$ticket_sla_info['business_days_passed'] = self::calculateWorkingDays ($ticket->created_date, time());
 		
 		
 		// find out if we missed the SLA
