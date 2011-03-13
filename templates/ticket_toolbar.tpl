@@ -8,7 +8,7 @@
 	<span id="ticket_sla_first_response">
 		<strong>First Response:</strong>
 			{if $ticket_sla_info.sla_type == "b"}
-				<span style="{if $ticket_sla_info.response_business_days == -1 || $ticket_sla_info.response_business_days > $ticket_sla_info.sla_days}color:#C00;{/if}">
+				<span style="{if $ticket_sla_info.response_business_days == -1 && $ticket_sla_info.response_business_days <= $ticket_sla_info.sla_days}color:#CA0;font-weight:bold;{else if $ticket_sla_info.response_business_days > $ticket_sla_info.sla_days}color:#C00;font-weight:bold;{/if}">
 					{if $ticket_sla_info.response_business_days == -1}
 						none
 					{else if $ticket_sla_info.response_business_days == 0}
@@ -18,7 +18,7 @@
 					{/if}
 				</span>
 			{else}
-				<span style="{if $ticket_sla_info.response_days == -1 || $ticket_sla_info.response_days > $ticket_sla_info.sla_days}color:#C00;{/if}">
+				<span style="{if $ticket_sla_info.response_days == -1 && $ticket_sla_info.response_days <= $ticket_sla_info.sla_days}color:#CA0;font-weight:bold;{else if $ticket_sla_info.response_days > $ticket_sla_info.sla_days}color:#C00;font-weight:bold;{/if}">
 					{if $ticket_sla_info.response_days == -1}
 						none
 					{else if $ticket_sla_info.response_days == 0}
