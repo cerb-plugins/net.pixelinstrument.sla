@@ -6,6 +6,7 @@
 	</span>
 {/if}
 
+{if $ticket_sla_info.sla-days > 0}
 <span id="ticket_sla_first_response">
 	<strong>First Response:</strong>
 		{if $ticket_sla_info.sla_type == "b"}
@@ -45,3 +46,4 @@
 			{/if}
 		</span>
 </span>
+{/if}
