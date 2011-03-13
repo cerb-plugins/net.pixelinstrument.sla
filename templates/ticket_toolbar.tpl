@@ -12,6 +12,8 @@
 			<span style="{if $ticket_sla_info.response_business_days == -1 || $ticket_sla_info.response_business_days > $ticket_sla_info.sla_days}color:#C00;{/if}">
 				{if $ticket_sla_info.response_business_days == -1}
 					none
+				{else if $ticket_sla_info.response_business_days == 0}
+					same day
 				{else}
 					in {$ticket_sla_info.response_business_days} business days
 				{/if}
@@ -20,6 +22,8 @@
 			<span style="{if $ticket_sla_info.response_days == -1 || $ticket_sla_info.response_days > $ticket_sla_info.sla_days}color:#C00;{/if}">
 				{if $ticket_sla_info.response_days == -1}
 					none
+				{else $ticket_sla_info.response_days == 0}
+					same day
 				{else}
 					in {$ticket_sla_info.response_days} days
 				{/if}
