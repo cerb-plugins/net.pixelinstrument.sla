@@ -32,7 +32,7 @@
 	
 	<span id="ticket_sla_last_response">	
 		<strong>Last Response:</strong>
-			<span style="{if $ticket_sla_info.last_response_time == -1}color:#C00;{/if}">
+			<span style="{if $ticket_sla_info.last_response_time == -1}color:#CA0;font-weight:bold;{/if}">
 				{if $ticket_sla_info.last_response_time == -1}
 					none
 				{else}
