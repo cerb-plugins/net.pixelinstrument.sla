@@ -2,9 +2,9 @@
 <plugin>
 	<id>net.pixelinstrument.sla</id>
 	<name>[PI] Tickets SLA Management</name>
-	<description>Manage calculation of SLA dates for tickets Version 1.0.0</description>
+	<description>Manage calculation of SLA dates for tickets Version 1.1.0</description>
 	<author>Davide Cassenti</author>
-	<revision>1.0.0</revision>
+	<revision>1.1.0</revision>
 	<link>http://www.pixelinstrument.net</link>
 	<image>plugin.png</image>
 	
@@ -47,6 +47,20 @@
 				<name>PiSlaToolbarSLA</name>
 			</class>
 			<params>
+			</params>
+		</extension>
+		
+		<!-- REST Controllers -->
+        
+        <extension point="cerberusweb.rest.controller">
+			<id>net.pixelinstrument.sla.rest.controller</id>
+			<name>SLA</name>
+			<class>
+				<file>api/rest/sla.php</file>
+				<name>ChRest_Sla</name>
+			</class>
+			<params>
+				<param key="uri" value="sla" />
 			</params>
 		</extension>
 	</extensions>

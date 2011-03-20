@@ -87,6 +87,11 @@ class PiSlaUtils {
 		$ticket_sla_info['days_passed'] = self::calculateDays ($ticket->created_date, time());
 		$ticket_sla_info['business_days_passed'] = self::calculateWorkingDays ($ticket->created_date, time());
 		
+		// calculate how many days ago the last reply was sent
+		if ($ticket_sla_info['last_response_time'] > 0) {
+			$ticket_sla_info['last_response_business_days_ago'] = PiSlaUtils::calculateWorkingDays ($ticket_sla_info['last_response_time'], time());
+			$ticket_sla_info['last_response_days_ago'] = PiSlaUtils::calculateDays ($ticket_sla_info['last_response_time'], time());
+		}
 		
 		// find out if we missed the SLA
 		$customer_type_field_id = $properties['customer_type_field_id'];
@@ -128,23 +133,22 @@ class PiSlaUtils {
 				}
 			
 				// check if we missed SLA
-				if ($ticket_sla_info['sla_days'] == 0) {
-					$ticket_sla_info['sla_status'] = "green"; // everything is ok, no SLA here
-				} else if ($first_response_time_to_use > $ticket_sla_info['sla_days']) {
-					$ticket_sla_info['sla_status'] = "red"; // oops, we missed it
-				} else if ($ticket_sla_info['first_response_time'] == -1) {
-					$ticket_sla_info['sla_status'] = "yellow"; // we're still in time...
+				if ($ticket_sla_info['sla_type'] == "b") {
+					if ($ticket_sla_info['response_business_days'] == -1 && $ticket_sla_info['business_days_passed'] <= $ticket_sla_info['sla_days'])
+						$ticket_sla_info['sla_status'] = "yellow";
+					else if ($ticket_sla_info['response_business_days'] == -1 || $ticket_sla_info['response_business_days'] > $ticket_sla_info['sla_days'])
+						$ticket_sla_info['sla_status'] = "red";
+					else
+						$ticket_sla_info['sla_status'] = "green";
 				} else {
-					$ticket_sla_info['sla_status'] = "green"; // great job!
+					if ($ticket_sla_info['response_days'] == -1 && $ticket_sla_info['days_passed'] <= $ticket_sla_info['sla_days'])
+						$ticket_sla_info['sla_status'] = "yellow";
+					else if ($ticket_sla_info['response_days'] == -1 || $ticket_sla_info['response_days'] > $ticket_sla_info['sla_days'])
+						$ticket_sla_info['sla_status'] = "red";
+					else
+						$ticket_sla_info['sla_status'] = "green";
 				}
 			}
-		}
-		
-		
-		// calculate how many days ago the last reply was sent
-		if ($ticket_sla_info['last_response_time'] > 0) {
-			$ticket_sla_info['last_response_business_days_ago'] = PiSlaUtils::calculateWorkingDays ($ticket_sla_info['last_response_time'], time());
-			$ticket_sla_info['last_response_days_ago'] = PiSlaUtils::calculateDays ($ticket_sla_info['last_response_time'], time());
 		}
 		
 		return $ticket_sla_info;
