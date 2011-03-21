@@ -38,6 +38,25 @@
 			</params>
 		</extension>
 		
+		<!-- Event Listeners -->
+		
+		<extension point="devblocks.listener.event">
+			<id>net.pixelinstrument.sla.listener</id>
+			<name>SLA Listener</name>
+			<class>
+				<file>api/listener.php</file>
+				<name>PiSlaEventListener</name>
+			</class>
+			<params>
+				<!-- Event Listener -->
+				<param key="events">
+					<value>
+						<data key="dao.ticket.update" />
+					</value>
+				</param>
+			</params>
+		</extension>
+		
 		<!-- Toolbar text -->	
 		<extension point="cerberusweb.ticket.toolbaritem">
 			<id>net.pixelinstrument.sla.ticket.toolbaritem</id>
