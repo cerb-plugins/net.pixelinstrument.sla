@@ -12,6 +12,7 @@
 	
 	<dependencies>
 		<require plugin_id="devblocks.core" version="2.0.0" />
+		<require plugin_id="cerberusweb.auditlog" version="0.0.0" />
 	</dependencies>
 	
 	<!-- ACL -->

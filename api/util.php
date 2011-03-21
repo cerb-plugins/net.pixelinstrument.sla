@@ -1,4 +1,9 @@
 <?php
+// Need to load the audit_log plugin
+DevblocksPlatform::registerClasses(APP_PATH . '/features/cerberusweb.auditlog/api/App.php', array(
+        'DAO_TicketAuditLog',
+        'SearchFields_TicketAuditLog'
+));
 
 class PiSlaUtils {
 	const ID = 'net.pixelinstrument.sla.utils';
