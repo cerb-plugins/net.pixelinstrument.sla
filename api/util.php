@@ -137,7 +137,7 @@ class PiSlaUtils {
 						$fields = array(
 							DAO_TicketAuditLog::TICKET_ID => $ticket_id,
 							DAO_TicketAuditLog::WORKER_ID => $worker_id,
-							DAO_TicketAuditLog::CHANGE_DATE => time(),
+							DAO_TicketAuditLog::CHANGE_DATE => $ticket->created_date,
 							DAO_TicketAuditLog::CHANGE_FIELD => 'sla_date',
 							DAO_TicketAuditLog::CHANGE_VALUE => substr($ticket_sla_info['sla_end_date'],0,128),
 						);
@@ -147,7 +147,7 @@ class PiSlaUtils {
 						$fields = array(
 							DAO_TicketAuditLog::TICKET_ID => $ticket_id,
 							DAO_TicketAuditLog::WORKER_ID => $worker_id,
-							DAO_TicketAuditLog::CHANGE_DATE => time(),
+							DAO_TicketAuditLog::CHANGE_DATE => $ticket->created_date,
 							DAO_TicketAuditLog::CHANGE_FIELD => 'sla_type',
 							DAO_TicketAuditLog::CHANGE_VALUE => substr($ticket_sla_info['sla_type'],0,128),
 						);
