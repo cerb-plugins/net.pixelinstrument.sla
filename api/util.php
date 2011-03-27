@@ -96,8 +96,10 @@ class PiSlaUtils {
 		list ($key, $sla_type) = each($sla_type);
 	
 		if (isset($sla_date[SearchFields_TicketAuditLog::CHANGE_VALUE]) && isset($sla_type[SearchFields_TicketAuditLog::CHANGE_VALUE])) {
-			 $ticket_sla_info['sla_end_date'] = intval ($sla_date[SearchFields_TicketAuditLog::CHANGE_VALUE]);
-			 $ticket_sla_info['sla_type'] = $sla_type[SearchFields_TicketAuditLog::CHANGE_VALUE];
+			$log_sla_date = intval ($sla_date[SearchFields_TicketAuditLog::CHANGE_VALUE]);
+			
+			$ticket_sla_info['sla_end_date'] = ($log_sla_date > 0) ? $log_sla_date : -1;
+			$ticket_sla_info['sla_type'] = $sla_type[SearchFields_TicketAuditLog::CHANGE_VALUE];
 		} else {
 			$customer_type_field_id = $properties['customer_type_field_id'];
 		
@@ -114,45 +116,50 @@ class PiSlaUtils {
 					$sla = isset ($properties['sla'][$customer_type]) ? ($properties['sla'][$customer_type]) : 0;
 					$sla_type = isset ($properties['sla_type'][$customer_type]) ? ($properties['sla_type'][$customer_type]) : "b";
 					
-					if ($sla > 0) {					
-						$ticket_sla_info['sla_type'] = $sla_type;
+					if ($sla <= 0)
+						$sla_type = '-';
+					
+					$ticket_sla_info['sla_type'] = $sla_type;
+					
+					switch ($sla_type) {
+						case 's':
+							$ticket_sla_info['sla_end_date'] = self::getEndStandardDate ($ticket->created_date, $sla);
+							break;
+					
+						case 'b':
+							$ticket_sla_info['sla_end_date'] = self::getEndBusinessDate ($ticket->created_date, $sla);
+							break;
 						
-						switch ($sla_type) {
-							case 's':
-								$ticket_sla_info['sla_end_date'] = $ticket->created_date + ($sla * 24 * 60 * 60);
-								break;
-						
-							case 'b':
-							default:
-								$ticket_sla_info['sla_end_date'] = self::getEndBusinessDate ($ticket->created_date, $sla);
-								break;
-						}
-						
-						// Is a worker around to invoke this change?  0 = automatic
-						@$worker_id = (null != ($active_worker = CerberusApplication::getActiveWorker()) && !empty($active_worker->id))
-							? $active_worker->id
-							: 0;
-						
-						// sla date
-						$fields = array(
-							DAO_TicketAuditLog::TICKET_ID => $ticket_id,
-							DAO_TicketAuditLog::WORKER_ID => $worker_id,
-							DAO_TicketAuditLog::CHANGE_DATE => $ticket->created_date,
-							DAO_TicketAuditLog::CHANGE_FIELD => 'sla_date',
-							DAO_TicketAuditLog::CHANGE_VALUE => substr($ticket_sla_info['sla_end_date'],0,128),
-						);
-						$log_id = DAO_TicketAuditLog::create($fields);
-						
-						// sla type
-						$fields = array(
-							DAO_TicketAuditLog::TICKET_ID => $ticket_id,
-							DAO_TicketAuditLog::WORKER_ID => $worker_id,
-							DAO_TicketAuditLog::CHANGE_DATE => $ticket->created_date,
-							DAO_TicketAuditLog::CHANGE_FIELD => 'sla_type',
-							DAO_TicketAuditLog::CHANGE_VALUE => substr($ticket_sla_info['sla_type'],0,128),
-						);
-						$log_id = DAO_TicketAuditLog::create($fields);
+						case '-':
+						default:
+							$ticket_sla_info['sla_end_date'] = "none";
+							break;
 					}
+					
+					// Is a worker around to invoke this change?  0 = automatic
+					@$worker_id = (null != ($active_worker = CerberusApplication::getActiveWorker()) && !empty($active_worker->id))
+						? $active_worker->id
+						: 0;
+					
+					// sla date
+					$fields = array(
+						DAO_TicketAuditLog::TICKET_ID => $ticket_id,
+						DAO_TicketAuditLog::WORKER_ID => $worker_id,
+						DAO_TicketAuditLog::CHANGE_DATE => $ticket->created_date,
+						DAO_TicketAuditLog::CHANGE_FIELD => 'sla_date',
+						DAO_TicketAuditLog::CHANGE_VALUE => substr($ticket_sla_info['sla_end_date'],0,128),
+					);
+					$log_id = DAO_TicketAuditLog::create($fields);
+					
+					// sla type
+					$fields = array(
+						DAO_TicketAuditLog::TICKET_ID => $ticket_id,
+						DAO_TicketAuditLog::WORKER_ID => $worker_id,
+						DAO_TicketAuditLog::CHANGE_DATE => $ticket->created_date,
+						DAO_TicketAuditLog::CHANGE_FIELD => 'sla_type',
+						DAO_TicketAuditLog::CHANGE_VALUE => substr($ticket_sla_info['sla_type'],0,128),
+					);
+					$log_id = DAO_TicketAuditLog::create($fields);
 				}
 			}
 		}
@@ -170,6 +177,38 @@ class PiSlaUtils {
 		}
 		
 		return $ticket_sla_info;
+	}
+	
+	/***
+	* getEndStandardDate
+	* Calculate the date resulting from the sum of $start with $standard_days
+	*
+	* $start the timestamp of the starting date
+	* $standard_days the number of standard days to add
+	* $properties array with the properties to use (if null, it will recreated)
+	*
+	* return the resulting end date
+	*/
+	static function getEndStandardDate ($start, $standard_days, $properties =  null) {
+		if ($standard_days <= 0)
+			return $start;
+			
+		if (!$properties)
+			$properties = self::getProperties();
+			
+		$holidays = array_keys ($properties['holidays']);
+        $working_days = $properties['working_days'];
+			
+		$cur_date = date ("Y-m-d", $start);
+		$standard_days++;
+		
+		while ($standard_days) {
+			$standard_days--;
+				
+			$cur_date = date ("Y-m-d", strtotime ("+1 days", strtotime($cur_date)));
+		}
+		
+		return strtotime($cur_date);
 	}
 	
 	/***
