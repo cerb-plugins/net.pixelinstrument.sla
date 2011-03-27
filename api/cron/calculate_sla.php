@@ -36,7 +36,7 @@ class PiSlaCalculate extends CerberusCronPageExtension {
 			array(
 				new DevblocksSearchCriteria(SearchFields_Ticket::TICKET_ID, DevblocksSearchCriteria::OPER_NIN,$tickets_ok_ids)
 			),
-			100, // update up to 100 tickets on each run
+			-1,
 			0,
 			SearchFields_Ticket::TICKET_UPDATED_DATE,
 			false,
