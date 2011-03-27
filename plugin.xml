@@ -58,6 +58,18 @@
 			</params>
 		</extension>
 		
+		<!-- Cron jobs -->
+		
+		<extension point="cerberusweb.cron">
+			<id>net.pixelinstrument.sla.cron.calculate</id>
+			<name>SLA Calculate</name>
+			<class>
+				<file>api/cron/calculate_sla.php</file>
+				<name>PiSlaCalculate</name>
+			</class>
+			<params/>
+		</extension>
+		
 		<!-- Toolbar text -->	
 		<extension point="cerberusweb.ticket.toolbaritem">
 			<id>net.pixelinstrument.sla.ticket.toolbaritem</id>

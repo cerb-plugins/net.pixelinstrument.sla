@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tmx SYSTEM "tmx14.dtd">
+<tmx version="1.4">
+	<header datatype="winres" segtype="sentence" adminlang="en-us" srclang="en-us" o-tmf="abc" />
+	<body>
+		<!-- generic cron info messages -->
+		
+		<tu tuid='net.pixelinstrument.sla.begin'>
+			<tuv xml:lang="en_US"><seg>[Rotation Manager] Begin SLA calculation.</seg></tuv>
+	    </tu>
+		
+		<tu tuid='net.pixelinstrument.sla.end'>
+			<tuv xml:lang="en_US"><seg>[Rotation Manager] End SLA calculation.</seg></tuv>
+	    </tu>
+		
+		<tu tuid='net.pixelinstrument.sla.updating_ticket'>
+			<tuv xml:lang="en_US"><seg>[Rotation Manager] Updating SLA for ticket %d.</seg></tuv>
+	    </tu>
+	</body>
+</tmx>
+<!-- 
+	
+-->

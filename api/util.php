@@ -101,9 +101,11 @@ class PiSlaUtils {
 			$ticket_sla_info['sla_end_date'] = ($log_sla_date > 0) ? $log_sla_date : -1;
 			$ticket_sla_info['sla_type'] = $sla_type[SearchFields_TicketAuditLog::CHANGE_VALUE];
 		} else {
-			$customer_type_field_id = $properties['customer_type_field_id'];
-		
+			$sla = -1;
+			$sla_type = -1;
+			
 			// get custom values for the customer, if any
+			$customer_type_field_id = $properties['customer_type_field_id'];
 			if ($customer_id > 0) {
 				$customers_custom_values = DAO_CustomFieldValue::getValuesByContextIds(CerberusContexts::CONTEXT_ORG, array($customer_id));
 				
@@ -115,53 +117,53 @@ class PiSlaUtils {
 					$customer_type = $customers_custom_values[$customer_id][$customer_type_field_id];
 					$sla = isset ($properties['sla'][$customer_type]) ? ($properties['sla'][$customer_type]) : 0;
 					$sla_type = isset ($properties['sla_type'][$customer_type]) ? ($properties['sla_type'][$customer_type]) : "b";
-					
-					if ($sla <= 0)
-						$sla_type = '-';
-					
-					$ticket_sla_info['sla_type'] = $sla_type;
-					
-					switch ($sla_type) {
-						case 's':
-							$ticket_sla_info['sla_end_date'] = self::getEndStandardDate ($ticket->created_date, $sla);
-							break;
-					
-						case 'b':
-							$ticket_sla_info['sla_end_date'] = self::getEndBusinessDate ($ticket->created_date, $sla);
-							break;
-						
-						case '-':
-						default:
-							$ticket_sla_info['sla_end_date'] = "none";
-							break;
-					}
-					
-					// Is a worker around to invoke this change?  0 = automatic
-					@$worker_id = (null != ($active_worker = CerberusApplication::getActiveWorker()) && !empty($active_worker->id))
-						? $active_worker->id
-						: 0;
-					
-					// sla date
-					$fields = array(
-						DAO_TicketAuditLog::TICKET_ID => $ticket_id,
-						DAO_TicketAuditLog::WORKER_ID => $worker_id,
-						DAO_TicketAuditLog::CHANGE_DATE => $ticket->created_date,
-						DAO_TicketAuditLog::CHANGE_FIELD => 'sla_date',
-						DAO_TicketAuditLog::CHANGE_VALUE => substr($ticket_sla_info['sla_end_date'],0,128),
-					);
-					$log_id = DAO_TicketAuditLog::create($fields);
-					
-					// sla type
-					$fields = array(
-						DAO_TicketAuditLog::TICKET_ID => $ticket_id,
-						DAO_TicketAuditLog::WORKER_ID => $worker_id,
-						DAO_TicketAuditLog::CHANGE_DATE => $ticket->created_date,
-						DAO_TicketAuditLog::CHANGE_FIELD => 'sla_type',
-						DAO_TicketAuditLog::CHANGE_VALUE => substr($ticket_sla_info['sla_type'],0,128),
-					);
-					$log_id = DAO_TicketAuditLog::create($fields);
 				}
 			}
+					
+			if ($sla <= 0)
+				$sla_type = '-';
+			
+			$ticket_sla_info['sla_type'] = $sla_type;
+			
+			switch ($sla_type) {
+				case 's':
+					$ticket_sla_info['sla_end_date'] = self::getEndStandardDate ($ticket->created_date, $sla);
+					break;
+			
+				case 'b':
+					$ticket_sla_info['sla_end_date'] = self::getEndBusinessDate ($ticket->created_date, $sla);
+					break;
+				
+				case '-':
+				default:
+					$ticket_sla_info['sla_end_date'] = "none";
+					break;
+			}
+			
+			// Is a worker around to invoke this change?  0 = automatic
+			@$worker_id = (null != ($active_worker = CerberusApplication::getActiveWorker()) && !empty($active_worker->id))
+				? $active_worker->id
+				: 0;
+			
+			// sla date
+			$fields = array(
+				DAO_TicketAuditLog::TICKET_ID => $ticket_id,
+				DAO_TicketAuditLog::WORKER_ID => $worker_id,
+				DAO_TicketAuditLog::CHANGE_DATE => $ticket->created_date,
+				DAO_TicketAuditLog::CHANGE_FIELD => 'sla_date',
+				DAO_TicketAuditLog::CHANGE_VALUE => substr($ticket_sla_info['sla_end_date'],0,128),
+			);
+			$log_id = DAO_TicketAuditLog::create($fields);
+			
+			// sla type
+			$fields = array(
+				DAO_TicketAuditLog::TICKET_ID => $ticket_id,
+				DAO_TicketAuditLog::WORKER_ID => $worker_id,
+				DAO_TicketAuditLog::CHANGE_DATE => $ticket->created_date,
+				DAO_TicketAuditLog::CHANGE_FIELD => 'sla_type',
+				DAO_TicketAuditLog::CHANGE_VALUE => substr($ticket_sla_info['sla_type'],0,128),
+			);
+			$log_id = DAO_TicketAuditLog::create($fields);
 		}
 		
 		// SLA status (green, yellow, red)
