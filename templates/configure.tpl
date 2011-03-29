@@ -1,9 +1,13 @@
-<h1>SLA Management settings</h1>
+<h2>{'net.pixelinstrument.sla'|devblocks_translate}</h2>
 
 <form action="{devblocks_url}{/devblocks_url}" method="post" id="configSLA">
     <input type="hidden" name="c" value="config">
-    <input type="hidden" name="a" value="saveTab">
-    <input type="hidden" name="ext_id" value="net.pixelinstrument.sla.config.tab">
+    <input type="hidden" name="a" value="handleSectionAction">
+    <input type="hidden" name="section" value="pi_sla">
+    <input type="hidden" name="action" value="save">
+
+<fieldset>
+	<legend>{'common.settings'|devblocks_translate|capitalize}</legend>
 	
 	Show SLA information in ticket page:
 	<input type="checkbox" name="show_sla_bar" value="1" {if $properties['show_sla_bar']}checked{/if} /><br/><br/>
@@ -75,4 +79,7 @@
         </table><em>(save to see more fields)</em><br/><br/>
     
     <button type="submit"><span class="cerb-sprite sprite-check"></span> {$translate->_('common.save_changes')|capitalize}</button>
+	
+</fieldset>
+
 </form>

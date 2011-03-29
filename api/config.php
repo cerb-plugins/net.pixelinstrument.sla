@@ -1,10 +1,24 @@
 <?php
-class PiSlaConfigTab extends Extension_ConfigTab {
-	const ID = 'net.pixelinstrument.sla.config.tab';
+class PageMenuItem_SetupPluginsPiSla extends Extension_PageMenuItem {
+	const POINT = 'net.pixelinstrument.sla.setup.plugins.menu';
 	
-	function showTab() {
+	function render() {
 		$tpl = DevblocksPlatform::getTemplateService();
-        
+		$tpl->assign('extension', $this);
+		$tpl->display('devblocks:net.pixelinstrument.sla::menu_item.tpl');
+	}
+};
+
+class PageSection_PiSla extends Extension_PageSection {
+	const ID = 'net.pixelinstrument.sla.setup.section';
+	
+	function render() {
+		$tpl = DevblocksPlatform::getTemplateService();
+		$visit = CerberusApplication::getVisit();
+		
+		$visit->set(ChConfigurationPage::ID, 'pi_sla');
+
+		// Get settings
         $properties = PiSlaUtils::getProperties();
         $tpl->assign('properties', $properties);
         
@@ -13,11 +27,11 @@ class PiSlaConfigTab extends Extension_ConfigTab {
         
         $ticket_fields = DAO_CustomField::getByContext(CerberusContexts::CONTEXT_TICKET);
 		$tpl->assign('ticket_fields', $ticket_fields);
-        
+		
 		$tpl->display('devblocks:net.pixelinstrument.sla::configure.tpl');
 	}
-    
-    function saveTab() {
+	
+	function saveAction() {
         @$show_sla_bar = DevblocksPlatform::importGPC($_REQUEST['show_sla_bar'], 'string', 0);
         @$working_days = DevblocksPlatform::importGPC($_REQUEST['working_days'],'array', array(1,2,3,4,5));
         @$holiday_name = DevblocksPlatform::importGPC($_REQUEST['holiday_name'],'array', array());
@@ -49,10 +63,6 @@ class PiSlaConfigTab extends Extension_ConfigTab {
         
 		DevblocksPlatform::setPluginSetting('net.pixelinstrument.sla', 'properties', json_encode($properties));
         
-		DevblocksPlatform::redirect(new DevblocksHttpResponse(array('config','sla')));
-		exit;
+		DevblocksPlatform::redirect(new DevblocksHttpResponse(array('config','pi_sla')));
 	}
 };
-
-
-?>

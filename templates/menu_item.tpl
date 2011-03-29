@@ -1,0 +1,1 @@
+<a href="{devblocks_url}c=config&a=pi_sla{/devblocks_url}">{'net.pixelinstrument.sla'|devblocks_translate}</a>
