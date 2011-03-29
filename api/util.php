@@ -295,12 +295,12 @@ class PiSlaUtils {
         // get properties
         $properties = array();
         
-        $properties = DAO_DevblocksExtensionPropertyStore::get(self::ID, 'properties', '');
+		$properties = DevblocksPlatform::getPluginSetting('net.pixelinstrument.sla', 'properties', '');
         
         if (empty ($properties)) {
             $properties = array ();
         } else {
-            $properties = unserialize ($properties);
+            $properties = json_decode ($properties, true);
         }
         
         

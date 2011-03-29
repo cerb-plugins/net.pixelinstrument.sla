@@ -47,7 +47,7 @@ class PiSlaConfigTab extends Extension_ConfigTab {
         $properties['sla'] = (sizeof ($sla_opt) && sizeof ($sla)) ? array_combine ($sla_opt, $sla) : array();
 		$properties['sla_type'] = (sizeof ($sla_opt) && sizeof ($sla_type)) ? array_combine ($sla_opt, $sla_type) : array();
         
-        DAO_DevblocksExtensionPropertyStore::put(PiSlaUtils::ID, 'properties', serialize ($properties));
+		DevblocksPlatform::setPluginSetting('net.pixelinstrument.sla', 'properties', json_encode($properties));
         
 		DevblocksPlatform::redirect(new DevblocksHttpResponse(array('config','sla')));
 		exit;
