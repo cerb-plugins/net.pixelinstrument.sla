@@ -59,7 +59,7 @@
                     <td>
                         <input class="holiday_{$i}" id="date_{$i}" type="text" name="holiday_date[]" value="{$date|date_format:"%A, %B %e, %Y"}" style="width: 200px" />
                         <button type="button" onclick="devblocksAjaxDateChooser('#date_{$i}','#choose_date_{$i}');"><span class="cerb-sprite sprite-calendar"></span></button>
-                        <button type="button" onclick="$('.holiday_{$i}').val('')"><span class="cerb-sprite sprite-delete"></span></button>
+                        <button type="button" onclick="$('.holiday_{$i}').val('')"><span class="cerb-sprite2 sprite-cross-circle-frame"></span></button>
                     </td>
                 </tr>
                 <tr><td colspan="2"><div id="choose_date_{$i}"></div></td></tr>
@@ -70,7 +70,7 @@
                     <td>
                         <input class="holiday_{$i}" id="date_{$i}" type="text" name="holiday_date[]" style="width: 200px" />
                         <button type="button" onclick="devblocksAjaxDateChooser('#date_{$i}','#choose_date_{$i}');"><span class="cerb-sprite sprite-calendar"></span></button>
-                        <button type="button" onclick="$('.holiday_{$i}').val('')"><span class="cerb-sprite sprite-delete"></span></button>
+                        <button type="button" onclick="$('.holiday_{$i}').val('')"><span class="cerb-sprite2 sprite-cross-circle-frame"></span></button>
                     </td>
                 </tr>
                 <tr><td colspan="2"><div id="choose_date_{$i}"></div></td></tr>
@@ -78,7 +78,7 @@
             {/for}
         </table><em>(save to see more fields)</em><br/><br/>
     
-    <button type="submit"><span class="cerb-sprite sprite-check"></span> {$translate->_('common.save_changes')|capitalize}</button>
+    <button type="submit"><span class="cerb-sprite2 sprite-tick-circle-frame"></span> {$translate->_('common.save_changes')|capitalize}</button>
 	
 </fieldset>
 
